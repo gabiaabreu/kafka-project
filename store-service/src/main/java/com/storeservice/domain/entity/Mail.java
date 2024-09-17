@@ -1,4 +1,4 @@
-package com.kafkaproject.domain.entity;
+package com.storeservice.domain.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,7 +1,7 @@
-package com.kafkaproject.controller;
+package com.storeservice.controller;
 
-import com.kafkaproject.domain.dto.MailRequest;
-import com.kafkaproject.service.MailService;
+import com.storeservice.domain.dto.MailRequest;
+import com.storeservice.service.MailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

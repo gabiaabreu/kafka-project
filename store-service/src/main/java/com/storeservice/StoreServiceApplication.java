@@ -1,13 +1,13 @@
-package com.kafkaproject;
+package com.storeservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class KafkaProjectApplication {
+public class StoreServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(KafkaProjectApplication.class, args);
+		SpringApplication.run(StoreServiceApplication.class, args);
 	}
 
 }

@@ -1,9 +1,9 @@
-package com.kafkaproject.consumer;
+package com.storeservice.consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.kafkaproject.domain.entity.Mail;
+import com.storeservice.domain.entity.Mail;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 

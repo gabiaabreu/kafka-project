@@ -1,4 +1,4 @@
-package com.kafkaproject.domain.dto;
+package com.storeservice.domain.dto;
 
 import lombok.Data;
 

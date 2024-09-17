@@ -1,6 +1,6 @@
-package com.kafkaproject.producer;
+package com.storeservice.producer;
 
-import com.kafkaproject.domain.entity.Mail;
+import com.storeservice.domain.entity.Mail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
