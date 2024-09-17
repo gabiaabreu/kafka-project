@@ -1,21 +1,26 @@
 package com.kafkaproject.controller;
 
-import com.kafkaproject.producer.KafkaProducer;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import com.kafkaproject.domain.dto.MailRequest;
+import com.kafkaproject.service.MailService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 public class MessageController {
 
-    private final KafkaProducer kafkaProducer;
-
-    public MessageController(KafkaProducer kafkaProducer) {
-        this.kafkaProducer = kafkaProducer;
-    }
+    private final MailService mailService;
 
     @PostMapping("/send")
-    public void sendMessageToKafka(@RequestBody String message) {
-        kafkaProducer.sendMessage(message);
+    public ResponseEntity<String> sendMessageToKafka(@RequestBody MailRequest mailRequest) {
+        try {
+            mailService.sendMail(mailRequest);
+            return ResponseEntity.ok("Mail sent successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send mail: " + e.getMessage());
+        }
     }
 }
