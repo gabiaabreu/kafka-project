@@ -21,6 +21,23 @@ services:
     depends_on:
       - zookeeper
 
+  kafka-init:
+    image: bitnami/kafka:latest
+    depends_on:
+      - kafka
+    entrypoint: >
+      bash -c "
+        echo 'Esperando Kafka iniciar...'
+        sleep 20;
+        echo 'Criando tópicos store-topic e payment-topic'
+        kafka-topics.sh --create --if-not-exists --topic store-topic --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 &&
+        kafka-topics.sh --create --if-not-exists --topic payment-topic --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1
+      "
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - ALLOW_PLAINTEXT_LISTENER=yes
+
   storeservice:
     build: ./store-service
     container_name: store-ms
