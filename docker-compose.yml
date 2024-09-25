@@ -54,7 +54,6 @@ services:
 
   postgres-db:
     image: postgres:latest
-    container_name: postgres-db
     restart: always
     environment:
       POSTGRES_USER: gabi
@@ -64,6 +63,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./sql/seed.sql:/docker-entrypoint-initdb.d/seed.sql
 
   adminer:
     image: adminer
