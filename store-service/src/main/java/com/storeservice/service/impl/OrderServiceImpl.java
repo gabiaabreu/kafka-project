@@ -41,22 +41,31 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderDate(LocalDateTime.now());
         order.setPaymentMethod(request.getPaymentMethod());
 
-        BigDecimal total = BigDecimal.ZERO;
+        var productTotal = BigDecimal.ZERO;
         List<OrderProductEntity> orderProducts = new ArrayList<>();
 
         for (OrderProductRequest productRequest : request.getProducts()) {
             var product = productRepository.findById(productRequest.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found with id: " + productRequest.getProductId()));
+                    .orElseThrow(() -> new RuntimeException(
+                            "Product not found with id: " + productRequest.getProductId()));
+
+            if (product.getStockQty() < productRequest.getQuantity()) {
+                throw new RuntimeException("Insufficient stock for product " + product.getName());
+            }
+
+            product.setStockQty(product.getStockQty() - productRequest.getQuantity());
 
             var orderProduct = new OrderProductEntity();
             orderProduct.setProduct(product);
             orderProduct.setQuantity(productRequest.getQuantity());
 
-            total = total.add(product.getPrice().multiply(BigDecimal.valueOf(productRequest.getQuantity())));
+            productTotal = productTotal.add(
+                    product.getPrice().multiply(BigDecimal.valueOf(productRequest.getQuantity())));
             orderProducts.add(orderProduct);
         }
 
-        order.setTotalAmount(total);
+        var discountedTotal = productTotal.multiply(BigDecimal.valueOf(1 - (request.getDiscount() / 100)));
+        order.setTotalAmount(discountedTotal.add(request.getShippingCost()));
 
         order = orderRepository.save(order);
 
