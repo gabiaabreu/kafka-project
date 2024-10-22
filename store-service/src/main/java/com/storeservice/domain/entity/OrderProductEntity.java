@@ -1,22 +1,22 @@
 package com.storeservice.domain.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
 @Table(name = "order_products")
+@Data
 public class OrderProductEntity {
-
-    @EmbeddedId
-    private OrderProductId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
-    @MapsId("orderId")
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", nullable = false)
     private OrderEntity order;
 
     @ManyToOne
-    @MapsId("productId")
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;
 
     @Column(nullable = false)
