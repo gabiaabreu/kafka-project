@@ -3,14 +3,13 @@ package com.storeservice.service.impl;
 import com.storeservice.domain.dto.OrderCreateRequest;
 import com.storeservice.domain.dto.OrderCreateResponse;
 import com.storeservice.domain.dto.OrderProductRequest;
-import com.storeservice.domain.dto.OrderProductResponse;
 import com.storeservice.domain.entity.OrderEntity;
 import com.storeservice.domain.entity.OrderProductEntity;
 import com.storeservice.mapper.OrderProductMapper;
 import com.storeservice.repository.OrderProductRepository;
 import com.storeservice.repository.OrderRepository;
-import com.storeservice.repository.ProductRepository;
 import com.storeservice.service.OrderService;
+import com.storeservice.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,18 +23,19 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
 
-    private final ProductRepository productRepository;
+    private final ProductService productService;
 
+    //todo: criar metodos service
     private final OrderProductRepository orderProductRepository;
 
     @Autowired
     private OrderProductMapper orderProductMapper;
 
     public OrderServiceImpl(final OrderRepository orderRepository,
-                            final ProductRepository productRepository,
+                            final ProductService productService,
                             final OrderProductRepository orderProductRepository) {
         this.orderRepository = orderRepository;
-        this.productRepository = productRepository;
+        this.productService = productService;
         this.orderProductRepository = orderProductRepository;
     }
 
@@ -49,15 +49,14 @@ public class OrderServiceImpl implements OrderService {
         List<OrderProductEntity> orderProductEntities = new ArrayList<>();
 
         for (OrderProductRequest productRequest : request.getProducts()) {
-            var product = productRepository.findById(productRequest.getProductId())
-                    .orElseThrow(() -> new RuntimeException(
-                            "Product not found with id: " + productRequest.getProductId()));
+            var product = productService.findById(productRequest.getProductId());
 
             if (product.getStockQty() < productRequest.getQuantity()) {
                 throw new RuntimeException("Insufficient stock for product " + product.getName());
             }
 
-            product.setStockQty(product.getStockQty() - productRequest.getQuantity());
+            productService.updateStock(product.getId(),
+                    product.getStockQty() - productRequest.getQuantity());
 
             var orderProduct = new OrderProductEntity();
             orderProduct.setProduct(product);
@@ -68,21 +67,13 @@ public class OrderServiceImpl implements OrderService {
             orderProductEntities.add(orderProduct);
         }
 
-        // todo: rever / separar metodo
-        double discount = 1 - ((double) request.getDiscount() / 100);
-        var bigDecimalDiscount = BigDecimal.valueOf(discount);
-        var discountedTotal = productTotal.multiply(bigDecimalDiscount);
-        order.setTotalAmount(discountedTotal.add(request.getShippingCost()));
-
+        order.setTotalAmount(getNetAmount(productTotal, request.getShippingCost(), request.getDiscount()));
         order = orderRepository.save(order);
 
         for (OrderProductEntity orderProduct : orderProductEntities) {
             orderProduct.setOrder(order);
             orderProductRepository.save(orderProduct);
         }
-
-        List<OrderProductResponse> productResponseList = orderProductMapper
-                .toOrderProductResponse(orderProductEntities);
 
         return OrderCreateResponse.builder()
                 .id(order.getId())
@@ -92,7 +83,15 @@ public class OrderServiceImpl implements OrderService {
                 .shippingCost(request.getShippingCost())
                 .discount(request.getDiscount())
                 .paymentMethod(order.getPaymentMethod())
-                .products(productResponseList)
+                .products(orderProductMapper
+                        .toOrderProductResponse(orderProductEntities))
                 .build();
+    }
+
+    private BigDecimal getNetAmount(BigDecimal productTotal, BigDecimal shippingCost, Integer discount) {
+        double percentage = 1 - ((double) discount / 100);
+        var bigDecimalDiscount = BigDecimal.valueOf(percentage);
+
+        return productTotal.multiply(bigDecimalDiscount).add(shippingCost);
     }
 }
