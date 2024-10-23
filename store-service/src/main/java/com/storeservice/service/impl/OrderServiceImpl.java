@@ -5,6 +5,7 @@ import com.storeservice.domain.dto.OrderCreateResponse;
 import com.storeservice.domain.dto.OrderProductRequest;
 import com.storeservice.domain.entity.OrderEntity;
 import com.storeservice.domain.entity.OrderProductEntity;
+import com.storeservice.domain.entity.ProductEntity;
 import com.storeservice.mapper.OrderProductMapper;
 import com.storeservice.repository.OrderProductRepository;
 import com.storeservice.repository.OrderRepository;
@@ -51,20 +52,15 @@ public class OrderServiceImpl implements OrderService {
         for (OrderProductRequest productRequest : request.getProducts()) {
             var product = productService.findById(productRequest.getProductId());
 
-            if (product.getStockQty() < productRequest.getQuantity()) {
-                throw new RuntimeException("Insufficient stock for product " + product.getName());
-            }
+            validateAndUpdateStock(product, productRequest.getQuantity());
 
-            productService.updateStock(product.getId(),
-                    product.getStockQty() - productRequest.getQuantity());
-
-            var orderProduct = new OrderProductEntity();
-            orderProduct.setProduct(product);
-            orderProduct.setQuantity(productRequest.getQuantity());
+            var orderProduct = createOrderProductEntity(product, productRequest.getQuantity());
+            orderProductEntities.add(orderProduct);
 
             productTotal = productTotal.add(
-                    product.getPrice().multiply(BigDecimal.valueOf(productRequest.getQuantity())));
-            orderProductEntities.add(orderProduct);
+                    product.getPrice()
+                            .multiply(BigDecimal.valueOf(productRequest.getQuantity()))
+            );
         }
 
         order.setTotalAmount(getNetAmount(productTotal, request.getShippingCost(), request.getDiscount()));
@@ -94,4 +90,19 @@ public class OrderServiceImpl implements OrderService {
 
         return productTotal.multiply(bigDecimalDiscount).add(shippingCost);
     }
-}
+
+    private void validateAndUpdateStock(ProductEntity product, Integer quantity) {
+        if (product.getStockQty() < quantity) {
+            throw new RuntimeException("Insufficient stock for product " + product.getName());
+        }
+
+        productService.updateStock(product.getId(),
+                product.getStockQty() - quantity);
+    }
+
+    private OrderProductEntity createOrderProductEntity(ProductEntity product, int quantity) {
+        var orderProduct = new OrderProductEntity();
+        orderProduct.setProduct(product);
+        orderProduct.setQuantity(quantity);
+        return orderProduct;
+    }}
