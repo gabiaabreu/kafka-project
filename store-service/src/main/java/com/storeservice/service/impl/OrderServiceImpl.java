@@ -5,12 +5,13 @@ import com.storeservice.domain.dto.OrderCreateRequest;
 import com.storeservice.domain.dto.OrderProductRequest;
 import com.storeservice.domain.entity.OrderEntity;
 import com.storeservice.domain.entity.OrderProductEntity;
-import com.storeservice.domain.entity.ProductEntity;
 import com.storeservice.mapper.OrderMapper;
+import com.storeservice.mapper.OrderProductMapper;
 import com.storeservice.repository.OrderProductRepository;
 import com.storeservice.repository.OrderRepository;
 import com.storeservice.repository.ProductRepository;
 import com.storeservice.service.OrderService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -27,6 +28,9 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderProductRepository orderProductRepository;
 
+    @Autowired
+    private OrderProductMapper orderProductMapper;
+
     public OrderServiceImpl(final OrderRepository orderRepository,
                             final ProductRepository productRepository,
                             final OrderProductRepository orderProductRepository) {
@@ -42,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
         order.setPaymentMethod(request.getPaymentMethod());
 
         var productTotal = BigDecimal.ZERO;
-        List<OrderProductEntity> orderProducts = new ArrayList<>();
+        List<OrderProductEntity> orderProductEntities = new ArrayList<>();
 
         for (OrderProductRequest productRequest : request.getProducts()) {
             var product = productRepository.findById(productRequest.getProductId())
@@ -61,19 +65,27 @@ public class OrderServiceImpl implements OrderService {
 
             productTotal = productTotal.add(
                     product.getPrice().multiply(BigDecimal.valueOf(productRequest.getQuantity())));
-            orderProducts.add(orderProduct);
+            orderProductEntities.add(orderProduct);
         }
 
-        var discountedTotal = productTotal.multiply(BigDecimal.valueOf(1 - (request.getDiscount() / 100)));
+        // todo: rever / separar metodo
+        double discount = 1 - ((double) request.getDiscount() / 100);
+        var bigDecimalDiscount = BigDecimal.valueOf(discount);
+        var discountedTotal = productTotal.multiply(bigDecimalDiscount);
         order.setTotalAmount(discountedTotal.add(request.getShippingCost()));
 
         order = orderRepository.save(order);
 
-        for (OrderProductEntity orderProduct : orderProducts) {
+        for (OrderProductEntity orderProduct : orderProductEntities) {
             orderProduct.setOrder(order);
             orderProductRepository.save(orderProduct);
         }
 
-        return OrderMapper.INSTANCE.toOrder(order);
+        var orderProductsDto = orderProductMapper.from(orderProductEntities);
+        // todo: alterar mapper para condizer com OrderProductMapper
+        var orderDto = OrderMapper.INSTANCE.toOrder(order);
+        orderDto.setOrderProducts(orderProductsDto);
+
+        return orderDto;
     }
 }
