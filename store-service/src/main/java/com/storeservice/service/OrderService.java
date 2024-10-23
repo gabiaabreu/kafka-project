@@ -1,8 +1,8 @@
 package com.storeservice.service;
 
-import com.storeservice.domain.dto.Order;
 import com.storeservice.domain.dto.OrderCreateRequest;
+import com.storeservice.domain.dto.OrderCreateResponse;
 
 public interface OrderService {
-    Order placeOrder(final OrderCreateRequest request);
+    OrderCreateResponse placeOrder(final OrderCreateRequest request);
 }

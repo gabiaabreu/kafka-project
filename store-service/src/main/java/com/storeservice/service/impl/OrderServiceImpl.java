@@ -1,11 +1,11 @@
 package com.storeservice.service.impl;
 
-import com.storeservice.domain.dto.Order;
 import com.storeservice.domain.dto.OrderCreateRequest;
+import com.storeservice.domain.dto.OrderCreateResponse;
 import com.storeservice.domain.dto.OrderProductRequest;
+import com.storeservice.domain.dto.OrderProductResponse;
 import com.storeservice.domain.entity.OrderEntity;
 import com.storeservice.domain.entity.OrderProductEntity;
-import com.storeservice.mapper.OrderMapper;
 import com.storeservice.mapper.OrderProductMapper;
 import com.storeservice.repository.OrderProductRepository;
 import com.storeservice.repository.OrderRepository;
@@ -39,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
         this.orderProductRepository = orderProductRepository;
     }
 
-    public Order placeOrder(final OrderCreateRequest request) {
+    public OrderCreateResponse placeOrder(final OrderCreateRequest request) {
         var order = new OrderEntity();
         order.setCustomerId(request.getCustomerId());
         order.setOrderDate(LocalDateTime.now());
@@ -81,11 +81,18 @@ public class OrderServiceImpl implements OrderService {
             orderProductRepository.save(orderProduct);
         }
 
-        var orderProductsDto = orderProductMapper.from(orderProductEntities);
-        // todo: alterar mapper para condizer com OrderProductMapper
-        var orderDto = OrderMapper.INSTANCE.toOrder(order);
-        orderDto.setOrderProducts(orderProductsDto);
+        List<OrderProductResponse> productResponseList = orderProductMapper
+                .toOrderProductResponse(orderProductEntities);
 
-        return orderDto;
+        return OrderCreateResponse.builder()
+                .id(order.getId())
+                .customerId(order.getCustomerId())
+                .orderDate(order.getOrderDate())
+                .totalAmount(order.getTotalAmount())
+                .shippingCost(request.getShippingCost())
+                .discount(request.getDiscount())
+                .paymentMethod(order.getPaymentMethod())
+                .products(productResponseList)
+                .build();
     }
 }
