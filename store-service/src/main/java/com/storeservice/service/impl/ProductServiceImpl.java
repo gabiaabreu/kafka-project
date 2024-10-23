@@ -12,8 +12,12 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository) {
+    private final ProductMapper productMapper;
+
+    public ProductServiceImpl(ProductRepository productRepository,
+                              ProductMapper productMapper) {
         this.productRepository = productRepository;
+        this.productMapper = productMapper;
     }
 
     public Product save(ProductCreateRequest request) {
@@ -22,9 +26,9 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalArgumentException("Product with given name already exists");
         }
 
-        var entity = ProductMapper.INSTANCE.toEntity(request);
+        var entity = productMapper.toEntity(request);
         var savedEntity = productRepository.save(entity);
 
-        return ProductMapper.INSTANCE.toProduct(savedEntity);
+        return productMapper.toProduct(savedEntity);
     }
 }
