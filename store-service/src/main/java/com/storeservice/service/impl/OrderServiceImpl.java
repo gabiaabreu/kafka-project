@@ -11,6 +11,7 @@ import com.storeservice.repository.OrderProductRepository;
 import com.storeservice.repository.OrderRepository;
 import com.storeservice.service.OrderService;
 import com.storeservice.service.ProductService;
+import exception.OutOfStockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -93,7 +94,7 @@ public class OrderServiceImpl implements OrderService {
 
     private void validateAndUpdateStock(ProductEntity product, Integer quantity) {
         if (product.getStockQty() < quantity) {
-            throw new RuntimeException("Insufficient stock for product " + product.getName());
+            throw new OutOfStockException(product.getName(), quantity, product.getStockQty());
         }
 
         productService.updateStock(product.getId(),

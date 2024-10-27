@@ -7,6 +7,7 @@ import com.storeservice.mapper.ProductMapper;
 import com.storeservice.repository.ProductRepository;
 import com.storeservice.service.ProductService;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -26,7 +27,7 @@ public class ProductServiceImpl implements ProductService {
         var productOptional = productRepository.findById(productId);
 
         if (productOptional.isEmpty()) {
-            throw new IllegalArgumentException("Product with given id does not exist: " + productId);
+            throw new NotFoundException("Product with given id does not exist: " + productId);
         }
         return productOptional.get();
     }
