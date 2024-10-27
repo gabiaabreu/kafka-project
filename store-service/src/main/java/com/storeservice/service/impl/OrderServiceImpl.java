@@ -7,8 +7,8 @@ import com.storeservice.domain.entity.OrderEntity;
 import com.storeservice.domain.entity.OrderProductEntity;
 import com.storeservice.domain.entity.ProductEntity;
 import com.storeservice.mapper.OrderProductMapper;
-import com.storeservice.repository.OrderProductRepository;
 import com.storeservice.repository.OrderRepository;
+import com.storeservice.service.OrderProductService;
 import com.storeservice.service.OrderService;
 import com.storeservice.service.ProductService;
 import exception.OutOfStockException;
@@ -27,18 +27,17 @@ public class OrderServiceImpl implements OrderService {
 
     private final ProductService productService;
 
-    //todo: criar metodos service
-    private final OrderProductRepository orderProductRepository;
+    private final OrderProductService orderProductService;
 
     @Autowired
     private OrderProductMapper orderProductMapper;
 
     public OrderServiceImpl(final OrderRepository orderRepository,
                             final ProductService productService,
-                            final OrderProductRepository orderProductRepository) {
+                            final OrderProductService orderProductService) {
         this.orderRepository = orderRepository;
         this.productService = productService;
-        this.orderProductRepository = orderProductRepository;
+        this.orderProductService = orderProductService;
     }
 
     public OrderCreateResponse placeOrder(final OrderCreateRequest request) {
@@ -69,7 +68,7 @@ public class OrderServiceImpl implements OrderService {
 
         for (OrderProductEntity orderProduct : orderProductEntities) {
             orderProduct.setOrder(order);
-            orderProductRepository.save(orderProduct);
+            orderProductService.save(orderProduct);
         }
 
         return OrderCreateResponse.builder()
