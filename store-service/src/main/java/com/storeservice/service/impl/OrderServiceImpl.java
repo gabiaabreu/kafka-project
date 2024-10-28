@@ -1,11 +1,12 @@
 package com.storeservice.service.impl;
 
 import com.storeservice.domain.dto.OrderCreateRequest;
-import com.storeservice.domain.dto.OrderCreateResponse;
+import com.storeservice.domain.dto.OrderResponse;
 import com.storeservice.domain.dto.OrderProductRequest;
 import com.storeservice.domain.entity.OrderEntity;
 import com.storeservice.domain.entity.OrderProductEntity;
 import com.storeservice.domain.entity.ProductEntity;
+import com.storeservice.mapper.OrderMapper;
 import com.storeservice.mapper.OrderProductMapper;
 import com.storeservice.repository.OrderRepository;
 import com.storeservice.service.OrderProductService;
@@ -14,6 +15,7 @@ import com.storeservice.service.ProductService;
 import exception.OutOfStockException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,6 +32,9 @@ public class OrderServiceImpl implements OrderService {
     private final OrderProductService orderProductService;
 
     @Autowired
+    private OrderMapper orderMapper;
+
+    @Autowired
     private OrderProductMapper orderProductMapper;
 
     public OrderServiceImpl(final OrderRepository orderRepository,
@@ -40,7 +45,7 @@ public class OrderServiceImpl implements OrderService {
         this.orderProductService = orderProductService;
     }
 
-    public OrderCreateResponse placeOrder(final OrderCreateRequest request) {
+    public OrderResponse placeOrder(final OrderCreateRequest request) {
         var order = new OrderEntity();
         order.setCustomerId(request.getCustomerId());
         order.setOrderDate(LocalDateTime.now());
@@ -71,17 +76,22 @@ public class OrderServiceImpl implements OrderService {
             orderProductService.save(orderProduct);
         }
 
-        return OrderCreateResponse.builder()
-                .id(order.getId())
-                .customerId(order.getCustomerId())
-                .orderDate(order.getOrderDate())
-                .totalAmount(order.getTotalAmount())
-                .shippingCost(request.getShippingCost())
-                .discount(request.getDiscount())
-                .paymentMethod(order.getPaymentMethod())
-                .products(orderProductMapper
-                        .toOrderProductResponse(orderProductEntities))
-                .build();
+        return orderMapper.toResponse(order);
+    }
+
+    public OrderResponse getOrder(final Long id) {
+        var orderOptional = orderRepository.findById(id);
+        // todo: orderOptional.get.orElse(throw....
+        if (orderOptional.isEmpty()) {
+            throw new NotFoundException("Order with given id does not exist: " + id);
+        }
+
+        return orderMapper.toResponse(orderOptional.get());
+    }
+
+    public List<OrderResponse> getOrders() {
+        var orders = orderRepository.findAll();
+        return orders.stream().map(order -> orderMapper.toResponse(order)).toList();
     }
 
     private BigDecimal getNetAmount(BigDecimal productTotal, BigDecimal shippingCost, Integer discount) {

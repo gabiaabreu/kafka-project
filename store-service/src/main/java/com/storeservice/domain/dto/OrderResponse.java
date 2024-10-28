@@ -9,7 +9,7 @@ import java.util.List;
 
 @Builder
 @Data
-public class OrderCreateResponse {
+public class OrderResponse {
     private Long id;
 
     private Long customerId;
@@ -24,5 +24,5 @@ public class OrderCreateResponse {
 
     private String paymentMethod;
 
-    private List<OrderProductResponse> products;
+    private List<OrderProductResponse> orderProducts;
 }
