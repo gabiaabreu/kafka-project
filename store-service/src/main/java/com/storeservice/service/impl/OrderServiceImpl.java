@@ -79,7 +79,7 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.toResponse(order);
     }
 
-    public OrderResponse getOrder(final Long id) {
+    public OrderResponse findById(final Long id) {
         var orderOptional = orderRepository.findById(id);
         // todo: orderOptional.get.orElse(throw....
         if (orderOptional.isEmpty()) {
@@ -89,7 +89,7 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.toResponse(orderOptional.get());
     }
 
-    public List<OrderResponse> getOrders() {
+    public List<OrderResponse> findAll() {
         var orders = orderRepository.findAll();
         return orders.stream().map(order -> orderMapper.toResponse(order)).toList();
     }

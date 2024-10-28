@@ -35,14 +35,14 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrder(@PathVariable Long id) {
-        var order = service.getOrder(id);
+        var order = service.findById(id);
 
         return ResponseEntity.ok().body(order);
     }
 
     @GetMapping
     public ResponseEntity<?> getOrders() {
-        var orders = service.getOrders();
+        var orders = service.findAll();
 
         return ResponseEntity.ok().body(orders);
     }
