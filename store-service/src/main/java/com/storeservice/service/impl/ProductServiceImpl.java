@@ -9,6 +9,8 @@ import com.storeservice.service.ProductService;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
+import java.util.List;
+
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -30,6 +32,13 @@ public class ProductServiceImpl implements ProductService {
             throw new NotFoundException("Product with given id does not exist: " + productId);
         }
         return productOptional.get();
+    }
+
+    @Override
+    public List<Product> findAll() {
+        var products = productRepository.findAll();
+
+        return products.stream().map(productMapper::toProduct).toList();
     }
 
     @Override
