@@ -1,5 +1,6 @@
 package com.storeservice.controller;
 
+import com.storeservice.domain.dto.Product;
 import com.storeservice.domain.dto.ProductCreateRequest;
 import com.storeservice.service.ProductService;
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/products")
@@ -20,8 +22,7 @@ public class ProductController {
     private final ProductService service;
 
     @PostMapping
-    public ResponseEntity<?> createProduct(@RequestBody ProductCreateRequest request) {
-        try {
+    public ResponseEntity<Product> createProduct(@RequestBody @Valid ProductCreateRequest request) {
             var product = service.save(request);
 
             URI location = ServletUriComponentsBuilder
@@ -31,38 +32,28 @@ public class ProductController {
                     .toUri();
 
             return ResponseEntity.created(location).body(product);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getProduct(@PathVariable Long id) {
-        try {
-            var product = service.findById(id);
+        // todo: nao deveria retornar Product?
+        var product = service.findById(id);
 
             return ResponseEntity.status(HttpStatus.OK).body(product);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
     }
 
     @GetMapping
-    public ResponseEntity<?> getProducts() {
+    public ResponseEntity<List<Product>> getProducts() {
         var products = service.findAll();
 
         return ResponseEntity.ok().body(products);
     }
 
     @PatchMapping("/{id}/stockUpdate")
-    public ResponseEntity<?> updateStock(@PathVariable Long id, @Valid @PositiveOrZero Integer stockQty) {
-        try {
+    public ResponseEntity<String> updateStock(@PathVariable Long id, @Valid @PositiveOrZero Integer stockQty) {
             service.updateStock(id, stockQty);
 
             return ResponseEntity.status(HttpStatus.OK).body(
                     String.format("Stock quantity updated for product id %d = %d", id, stockQty));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
     }
 }
