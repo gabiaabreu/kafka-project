@@ -50,6 +50,8 @@ public class OrderServiceImpl implements OrderService {
         order.setCustomerId(request.getCustomerId());
         order.setOrderDate(LocalDateTime.now());
         order.setPaymentMethod(request.getPaymentMethod());
+        order.setDiscount(request.getDiscount());
+        order.setShippingCost(request.getShippingCost()); // todo: fazer sets com mapper?
 
         var productTotal = BigDecimal.ZERO;
         List<OrderProductEntity> orderProductEntities = new ArrayList<>();

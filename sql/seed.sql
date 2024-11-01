@@ -8,10 +8,10 @@ INSERT INTO products (name, description, price, stock_qty) VALUES
 ('Calça Jeans', 'Calça jeans azul', 89.90, 50),
 ('Tênis', 'Tênis esportivo', 199.90, 30);
 
-INSERT INTO orders (customer_id, total_amount, payment_method, payment_status) VALUES
-(1, 119.80, 'CREDIT_CARD', 'PENDING'),
-(2, 29.90, 'DEBIT_CARD', 'PENDING'),
-(3, 199.90, 'PIX', 'PENDING');
+INSERT INTO orders (customer_id, total_amount, shipping_cost, discount, payment_method, payment_status) VALUES
+(1, 119.80, 10.90, 10, 'CREDIT_CARD', 'PENDING'),
+(2, 29.90, 19.90, 5, 'DEBIT_CARD', 'PENDING'),
+(3, 199.90, 15.60, 0, 'PIX', 'PENDING');
 
 INSERT INTO order_products (order_id, product_id, quantity) VALUES
 (1, 1, 2),

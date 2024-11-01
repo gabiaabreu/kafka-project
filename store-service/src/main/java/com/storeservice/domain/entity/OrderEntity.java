@@ -11,7 +11,6 @@ import java.util.List;
 @Table(name = "orders")
 @Data
 public class OrderEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
@@ -25,6 +24,12 @@ public class OrderEntity {
 
     @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
+
+    @Column(name = "shipping_cost", nullable = false, precision = 10, scale = 2)
+    private BigDecimal shippingCost;
+
+    @Column(name = "discount", nullable = false)
+    private Integer discount;
 
     @Column(name = "payment_method", nullable = false, length = 50)
     private String paymentMethod;

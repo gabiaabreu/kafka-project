@@ -20,6 +20,8 @@ CREATE TABLE orders (
     customer_id INT REFERENCES customers(customer_id),
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total_amount DECIMAL(10, 2) NOT NULL,
+    shipping_cost DECIMAL(10, 2) NOT NULL,
+    discount INT NOT NULL,
     payment_method VARCHAR(50) NOT NULL,
     payment_status VARCHAR(50) NOT NULL DEFAULT 'PENDING'
 );

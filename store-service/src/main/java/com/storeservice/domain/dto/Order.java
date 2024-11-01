@@ -22,6 +22,10 @@ public class Order {
 
     private BigDecimal totalAmount;
 
+    private BigDecimal shippingCost;
+
+    private Integer discount;
+
     private String paymentMethod;
 
     private String paymentStatus = "PENDING";
