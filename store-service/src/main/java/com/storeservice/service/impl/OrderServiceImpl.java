@@ -1,8 +1,8 @@
 package com.storeservice.service.impl;
 
 import com.storeservice.domain.dto.OrderCreateRequest;
-import com.storeservice.domain.dto.OrderResponse;
 import com.storeservice.domain.dto.OrderProductRequest;
+import com.storeservice.domain.dto.OrderResponse;
 import com.storeservice.domain.entity.OrderEntity;
 import com.storeservice.domain.entity.OrderProductEntity;
 import com.storeservice.domain.entity.ProductEntity;
@@ -78,7 +78,11 @@ public class OrderServiceImpl implements OrderService {
             orderProductService.save(orderProduct);
         }
 
-        return orderMapper.toResponse(order);
+        var orderProductResponseList = orderProductMapper.toOrderProductResponse(orderProductEntities);
+        var orderResponse = orderMapper.toResponse(order);
+        orderResponse.setOrderProducts(orderProductResponseList);
+
+        return orderResponse;
     }
 
     public OrderResponse findById(final Long id) {
