@@ -19,15 +19,15 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponse> placeOrder(@RequestBody OrderCreateRequest request) {
-            var order = service.placeOrder(request);
+        var order = service.placeOrder(request);
 
-            URI location = ServletUriComponentsBuilder
-                    .fromCurrentRequest()
-                    .path("/{id}")
-                    .buildAndExpand(order.getId())
-                    .toUri();
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(order.getId())
+                .toUri();
 
-            return ResponseEntity.created(location).body(order);
+        return ResponseEntity.created(location).body(order);
     }
 
     @GetMapping("/{id}")
