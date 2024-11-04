@@ -8,6 +8,7 @@ import com.storeservice.domain.entity.OrderProductEntity;
 import com.storeservice.domain.entity.ProductEntity;
 import com.storeservice.mapper.OrderMapper;
 import com.storeservice.mapper.OrderProductMapper;
+import com.storeservice.mapper.ProductMapper;
 import com.storeservice.repository.OrderRepository;
 import com.storeservice.service.OrderProductService;
 import com.storeservice.service.OrderService;
@@ -37,6 +38,9 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderProductMapper orderProductMapper;
 
+    @Autowired
+    private ProductMapper productMapper;
+
     public OrderServiceImpl(final OrderRepository orderRepository,
                             final ProductService productService,
                             final OrderProductService orderProductService) {
@@ -58,10 +62,11 @@ public class OrderServiceImpl implements OrderService {
 
         for (OrderProductRequest productRequest : request.getProducts()) {
             var product = productService.findById(productRequest.getProductId());
+            var productEntity = productMapper.toEntity(product);
 
-            validateAndUpdateStock(product, productRequest.getQuantity());
+            var updatedEntity = validateAndUpdateStock(productEntity, productRequest.getQuantity());
 
-            var orderProduct = createOrderProductEntity(product, productRequest.getQuantity());
+            var orderProduct = createOrderProductEntity(updatedEntity, productRequest.getQuantity());
             orderProductEntities.add(orderProduct);
 
             productTotal = productTotal.add(
@@ -86,13 +91,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public OrderResponse findById(final Long id) {
-        var orderOptional = orderRepository.findById(id);
-        // todo: orderOptional.get.orElse(throw....
-        if (orderOptional.isEmpty()) {
-            throw new NotFoundException("Order with given id does not exist: " + id);
-        }
+        var order = orderRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Order with given id does not exist: " + id));
 
-        return orderMapper.toResponse(orderOptional.get());
+        return orderMapper.toResponse(order);
     }
 
     public List<OrderResponse> findAll() {
@@ -107,13 +109,16 @@ public class OrderServiceImpl implements OrderService {
         return productTotal.multiply(bigDecimalDiscount).add(shippingCost);
     }
 
-    private void validateAndUpdateStock(ProductEntity product, Integer quantity) {
+    private ProductEntity validateAndUpdateStock(ProductEntity product, Integer quantity) {
         if (product.getStockQty() < quantity) {
             throw new OutOfStockException(product.getName(), quantity, product.getStockQty());
         }
 
-        productService.updateStock(product.getId(),
-                product.getStockQty() - quantity);
+        var newQuantity = product.getStockQty() - quantity;
+        productService.updateStock(product.getId(), newQuantity);
+
+        product.setStockQty(newQuantity);
+        return product;
     }
 
     private OrderProductEntity createOrderProductEntity(ProductEntity product, int quantity) {
