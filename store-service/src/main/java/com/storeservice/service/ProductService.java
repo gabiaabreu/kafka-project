@@ -1,20 +1,20 @@
 package com.storeservice.service;
 
 import com.storeservice.domain.dto.Product;
-import com.storeservice.domain.dto.ProductCreateRequest;
-import com.storeservice.domain.entity.ProductEntity;
+import com.storeservice.domain.dto.ProductRequest;
 
 import java.util.List;
 
 public interface ProductService {
-    ProductEntity findById(Long productId);
-    // todo: nao deveria retornar Product?
+    Product findById(Long productId);
 
     List<Product> findAll();
 
     boolean existsByName(String productName);
 
-    Product save(ProductCreateRequest request);
+    Product save(ProductRequest request);
+
+    Product update(Long productId, ProductRequest request);
 
     void updateStock(Long productId, Integer stockQty);
 }

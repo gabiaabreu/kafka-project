@@ -1,8 +1,7 @@
 package com.storeservice.service.impl;
 
 import com.storeservice.domain.dto.Product;
-import com.storeservice.domain.dto.ProductCreateRequest;
-import com.storeservice.domain.entity.ProductEntity;
+import com.storeservice.domain.dto.ProductRequest;
 import com.storeservice.mapper.ProductMapper;
 import com.storeservice.repository.ProductRepository;
 import com.storeservice.service.ProductService;
@@ -25,13 +24,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductEntity findById(Long productId) {
-        var productOptional = productRepository.findById(productId);
+    public Product findById(Long productId) {
+        var product = productRepository.findById(productId).orElseThrow(
+                () -> new NotFoundException("Product with given id does not exist: " + productId)
+        );
 
-        if (productOptional.isEmpty()) {
-            throw new NotFoundException("Product with given id does not exist: " + productId);
-        }
-        return productOptional.get();
+        return productMapper.toProduct(product);
     }
 
     @Override
@@ -47,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product save(ProductCreateRequest request) {
+    public Product save(ProductRequest request) {
         var exists = existsByName(request.getName());
         if (exists) {
             throw new IllegalArgumentException("Product with given name already exists: " + request.getName());
@@ -60,11 +58,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Product update(Long productId, ProductRequest request) {
+        var existingProduct = findById(productId);
+        var entity = productMapper.toEntity(existingProduct);
+
+        productMapper.updateEntity(request, entity);
+
+        var updatedProduct = productRepository.save(entity);
+        return productMapper.toProduct(updatedProduct);
+    }
+
+    @Override
     public void updateStock(Long productId, Integer stockQty) {
         var product = findById(productId);
 
         product.setStockQty(stockQty);
-        productRepository.save(product);
+        productRepository.save(productMapper.toEntity(product));
     }
-
 }
