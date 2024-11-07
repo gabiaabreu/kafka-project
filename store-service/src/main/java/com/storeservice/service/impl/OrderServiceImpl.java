@@ -15,6 +15,7 @@ import com.storeservice.service.OrderService;
 import com.storeservice.service.ProductService;
 import exception.OutOfStockException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
@@ -98,7 +99,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public List<OrderResponse> findAll() {
-        var orders = orderRepository.findAll();
+        Sort sort = Sort.by(Sort.Direction.fromString("DESC"), "orderDate");
+        var orders = orderRepository.findAll(sort);
+
         return orders.stream().map(order -> orderMapper.toResponse(order)).toList();
     }
 

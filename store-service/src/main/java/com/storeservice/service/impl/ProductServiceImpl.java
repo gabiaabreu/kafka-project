@@ -5,6 +5,7 @@ import com.storeservice.domain.dto.ProductRequest;
 import com.storeservice.mapper.ProductMapper;
 import com.storeservice.repository.ProductRepository;
 import com.storeservice.service.ProductService;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
@@ -34,7 +35,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> findAll() {
-        var products = productRepository.findAll();
+        Sort sort = Sort.by(Sort.Direction.fromString("ASC"), "id");
+        var products = productRepository.findAll(sort);
 
         return products.stream().map(productMapper::toProduct).toList();
     }
