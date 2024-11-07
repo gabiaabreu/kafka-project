@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -34,8 +35,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> findAll() {
-        Sort sort = Sort.by(Sort.Direction.fromString("ASC"), "id");
+    public List<Product> findAll(
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            Integer minStock,
+            String sortDirection,
+            String sortAttribute
+    ) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortAttribute);
         var products = productRepository.findAll(sort);
 
         return products.stream().map(productMapper::toProduct).toList();
