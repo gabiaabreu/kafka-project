@@ -43,7 +43,7 @@ public class ProductServiceImpl implements ProductService {
             String sortAttribute
     ) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortAttribute);
-        var products = productRepository.findAll(sort);
+        var products = productRepository.findByPriceAndStock(minPrice, maxPrice, minStock, sort);
 
         return products.stream().map(productMapper::toProduct).toList();
     }
