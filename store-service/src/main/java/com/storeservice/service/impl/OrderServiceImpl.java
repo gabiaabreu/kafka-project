@@ -20,9 +20,12 @@ import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -98,9 +101,22 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.toResponse(order);
     }
 
-    public List<OrderResponse> findAll() {
+    public List<OrderResponse> findAll(final LocalDate minDate, final LocalDate maxDate) {
         Sort sort = Sort.by(Sort.Direction.fromString("DESC"), "orderDate");
-        var orders = orderRepository.findAll(sort);
+
+        LocalDateTime minDateTime = Optional.ofNullable(minDate)
+                .map(LocalDate::atStartOfDay)
+                .orElse(null);
+
+        LocalDateTime maxDateTime = Optional.ofNullable(maxDate)
+                .map(date -> date.atTime(LocalTime.MAX))
+                .orElse(null);
+
+        var orders = orderRepository.findByDate(
+                minDateTime,
+                maxDateTime,
+                sort
+        );
 
         return orders.stream().map(order -> orderMapper.toResponse(order)).toList();
     }
@@ -129,4 +145,5 @@ public class OrderServiceImpl implements OrderService {
         orderProduct.setProduct(product);
         orderProduct.setQuantity(quantity);
         return orderProduct;
-    }}
+    }
+}

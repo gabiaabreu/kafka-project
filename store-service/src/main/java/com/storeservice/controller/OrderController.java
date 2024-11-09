@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -38,8 +39,11 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> getOrders() {
-        var orders = service.findAll();
+    public ResponseEntity<List<OrderResponse>> getOrders(
+            @RequestParam(required = false) LocalDate minDate,
+            @RequestParam(required = false) LocalDate maxDate
+    ) {
+        var orders = service.findAll(minDate, maxDate);
 
         return ResponseEntity.ok().body(orders);
     }
