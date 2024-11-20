@@ -2,15 +2,18 @@ package com.storeservice.service.impl;
 
 import com.storeservice.domain.dto.Product;
 import com.storeservice.domain.dto.ProductRequest;
+import com.storeservice.domain.dto.SimplifiedPageRequest;
 import com.storeservice.mapper.ProductMapper;
 import com.storeservice.repository.ProductRepository;
 import com.storeservice.service.ProductService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -35,17 +38,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> findAll(
+    public Page<Product> findAll(
             BigDecimal minPrice,
             BigDecimal maxPrice,
             Integer minStock,
             String sortDirection,
-            String sortAttribute
+            String sortAttribute,
+            SimplifiedPageRequest pageRequest
     ) {
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortAttribute);
-        var products = productRepository.findByPriceAndStock(minPrice, maxPrice, minStock, sort);
+        Pageable pageable = PageRequest.of(
+                pageRequest.getPageNumber(),
+                pageRequest.getPageSize(),
+                Sort.Direction.fromString(sortDirection),
+                sortAttribute
+        );
 
-        return products.stream().map(productMapper::toProduct).toList();
+        var productsPage = productRepository.findByPriceAndStock(minPrice, maxPrice, minStock, pageable);
+
+        return productsPage.map(productMapper::toProduct);
     }
 
     @Override

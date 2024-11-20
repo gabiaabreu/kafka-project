@@ -2,10 +2,12 @@ package com.storeservice.controller;
 
 import com.storeservice.domain.dto.Product;
 import com.storeservice.domain.dto.ProductRequest;
+import com.storeservice.domain.dto.SimplifiedPageRequest;
 import com.storeservice.service.ProductService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +15,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/products")
@@ -43,21 +44,24 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts(
+    public ResponseEntity<Page<Product>> getAllProducts(
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) Integer minStock,
             @RequestParam(defaultValue = "asc") String sortDirection,
-            @RequestParam(defaultValue = "name") String sortAttribute
-            ) {
-        var products = service.findAll(minPrice, maxPrice, minStock, sortDirection, sortAttribute);
+            @RequestParam(defaultValue = "name") String sortAttribute,
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "5") Integer pageSize
+    ) {
+        var pageRequest = SimplifiedPageRequest.builder().pageNumber(pageNumber).pageSize(pageSize).build();
+        var products = service.findAll(minPrice, maxPrice, minStock, sortDirection, sortAttribute, pageRequest);
 
         return ResponseEntity.ok().body(products);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id,
-                                          @RequestBody @Valid ProductRequest request) {
+                                                 @RequestBody @Valid ProductRequest request) {
         var product = service.update(id, request);
 
         return ResponseEntity.ok().body(product);
