@@ -1,23 +1,14 @@
 package com.storeservice.service;
 
 import com.storeservice.domain.dto.Product;
+import com.storeservice.domain.dto.ProductFilterRequest;
 import com.storeservice.domain.dto.ProductRequest;
-import com.storeservice.domain.dto.SimplifiedPageRequest;
 import org.springframework.data.domain.Page;
-
-import java.math.BigDecimal;
 
 public interface ProductService {
     Product findById(Long productId);
 
-    Page<Product> findAll(
-            BigDecimal minPrice,
-            BigDecimal maxPrice,
-            Integer minStock,
-            String sortDirection,
-            String sortAttribute,
-            SimplifiedPageRequest pageRequest
-    );
+    Page<Product> findAll(ProductFilterRequest request);
 
     boolean existsByName(String productName);
 

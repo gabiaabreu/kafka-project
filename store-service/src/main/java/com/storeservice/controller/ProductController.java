@@ -1,8 +1,8 @@
 package com.storeservice.controller;
 
 import com.storeservice.domain.dto.Product;
+import com.storeservice.domain.dto.ProductFilterRequest;
 import com.storeservice.domain.dto.ProductRequest;
-import com.storeservice.domain.dto.SimplifiedPageRequest;
 import com.storeservice.service.ProductService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.math.BigDecimal;
 import java.net.URI;
 
 @RestController
@@ -44,17 +43,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Product>> getAllProducts(
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) Integer minStock,
-            @RequestParam(defaultValue = "asc") String sortDirection,
-            @RequestParam(defaultValue = "name") String sortAttribute,
-            @RequestParam(defaultValue = "0") Integer pageNumber,
-            @RequestParam(defaultValue = "5") Integer pageSize
-    ) {
-        var pageRequest = SimplifiedPageRequest.builder().pageNumber(pageNumber).pageSize(pageSize).build();
-        var products = service.findAll(minPrice, maxPrice, minStock, sortDirection, sortAttribute, pageRequest);
+    public ResponseEntity<Page<Product>> getAllProducts(@ModelAttribute @Valid ProductFilterRequest request) {
+        var products = service.findAll(request);
 
         return ResponseEntity.ok().body(products);
     }

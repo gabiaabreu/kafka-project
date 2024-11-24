@@ -1,8 +1,8 @@
 package com.storeservice.service.impl;
 
 import com.storeservice.domain.dto.Product;
+import com.storeservice.domain.dto.ProductFilterRequest;
 import com.storeservice.domain.dto.ProductRequest;
-import com.storeservice.domain.dto.SimplifiedPageRequest;
 import com.storeservice.mapper.ProductMapper;
 import com.storeservice.repository.ProductRepository;
 import com.storeservice.service.ProductService;
@@ -12,8 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
-
-import java.math.BigDecimal;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -38,22 +36,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> findAll(
-            BigDecimal minPrice,
-            BigDecimal maxPrice,
-            Integer minStock,
-            String sortDirection,
-            String sortAttribute,
-            SimplifiedPageRequest pageRequest
-    ) {
+    public Page<Product> findAll(ProductFilterRequest request) {
+
+        var sortDirection = request.getSortDirection().isBlank() ? "asc" : request.getSortDirection();
+        var sortAttribute = request.getSortAttribute().isBlank() ? "name" : request.getSortAttribute();
+
         Pageable pageable = PageRequest.of(
-                pageRequest.getPageNumber(),
-                pageRequest.getPageSize(),
+                request.getPageNumber(),
+                request.getPageSize(),
                 Sort.Direction.fromString(sortDirection),
                 sortAttribute
         );
 
-        var productsPage = productRepository.findByPriceAndStock(minPrice, maxPrice, minStock, pageable);
+        var productsPage = productRepository.findByPriceAndStock(
+                request.getMinPrice(),
+                request.getMaxPrice(),
+                request.getMinStock(),
+                pageable
+        );
 
         return productsPage.map(productMapper::toProduct);
     }
