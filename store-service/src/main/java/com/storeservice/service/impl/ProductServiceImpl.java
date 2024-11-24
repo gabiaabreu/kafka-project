@@ -1,12 +1,12 @@
 package com.storeservice.service.impl;
 
+import com.storeservice.domain.dto.PageResponse;
 import com.storeservice.domain.dto.Product;
 import com.storeservice.domain.dto.ProductFilterRequest;
 import com.storeservice.domain.dto.ProductRequest;
 import com.storeservice.mapper.ProductMapper;
 import com.storeservice.repository.ProductRepository;
 import com.storeservice.service.ProductService;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -36,7 +36,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> findAll(ProductFilterRequest request) {
+    public PageResponse<Product> findAll(ProductFilterRequest request) {
 
         var sortDirection = request.getSortDirection().isBlank() ? "asc" : request.getSortDirection();
         var sortAttribute = request.getSortAttribute().isBlank() ? "name" : request.getSortAttribute();
@@ -48,14 +48,15 @@ public class ProductServiceImpl implements ProductService {
                 sortAttribute
         );
 
-        var productsPage = productRepository.findByPriceAndStock(
+        var entityPage = productRepository.findByPriceAndStock(
                 request.getMinPrice(),
                 request.getMaxPrice(),
                 request.getMinStock(),
                 pageable
         );
 
-        return productsPage.map(productMapper::toProduct);
+        var productsPage = entityPage.map(productMapper::toProduct);
+        return new PageResponse<>(productsPage);
     }
 
     @Override

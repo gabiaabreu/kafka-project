@@ -1,14 +1,14 @@
 package com.storeservice.service;
 
+import com.storeservice.domain.dto.PageResponse;
 import com.storeservice.domain.dto.Product;
 import com.storeservice.domain.dto.ProductFilterRequest;
 import com.storeservice.domain.dto.ProductRequest;
-import org.springframework.data.domain.Page;
 
 public interface ProductService {
     Product findById(Long productId);
 
-    Page<Product> findAll(ProductFilterRequest request);
+    PageResponse<Product> findAll(ProductFilterRequest request);
 
     boolean existsByName(String productName);
 

@@ -1,5 +1,6 @@
 package com.storeservice.controller;
 
+import com.storeservice.domain.dto.PageResponse;
 import com.storeservice.domain.dto.Product;
 import com.storeservice.domain.dto.ProductFilterRequest;
 import com.storeservice.domain.dto.ProductRequest;
@@ -7,7 +8,6 @@ import com.storeservice.service.ProductService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +43,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Product>> getAllProducts(@ModelAttribute @Valid ProductFilterRequest request) {
+    public ResponseEntity<PageResponse<Product>> getAllProducts(@ModelAttribute @Valid ProductFilterRequest request) {
         var products = service.findAll(request);
 
         return ResponseEntity.ok().body(products);
