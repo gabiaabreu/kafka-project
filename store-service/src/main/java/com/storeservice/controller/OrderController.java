@@ -2,7 +2,10 @@ package com.storeservice.controller;
 
 import com.storeservice.domain.dto.OrderCreateRequest;
 import com.storeservice.domain.dto.OrderResponse;
+import com.storeservice.domain.dto.PageResponse;
+import com.storeservice.domain.dto.SortAndPageRequest;
 import com.storeservice.service.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,11 +42,12 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> getOrders(
+    public ResponseEntity<PageResponse<OrderResponse>> getOrders(
             @RequestParam(required = false) LocalDate minDate,
-            @RequestParam(required = false) LocalDate maxDate
+            @RequestParam(required = false) LocalDate maxDate,
+            @Valid SortAndPageRequest sortAndPageRequest
     ) {
-        var orders = service.findAll(minDate, maxDate);
+        var orders = service.findAll(minDate, maxDate, sortAndPageRequest);
 
         return ResponseEntity.ok().body(orders);
     }

@@ -1,8 +1,6 @@
 package com.storeservice.service.impl;
 
-import com.storeservice.domain.dto.OrderCreateRequest;
-import com.storeservice.domain.dto.OrderProductRequest;
-import com.storeservice.domain.dto.OrderResponse;
+import com.storeservice.domain.dto.*;
 import com.storeservice.domain.entity.OrderEntity;
 import com.storeservice.domain.entity.OrderProductEntity;
 import com.storeservice.domain.entity.ProductEntity;
@@ -15,6 +13,8 @@ import com.storeservice.service.OrderService;
 import com.storeservice.service.ProductService;
 import exception.OutOfStockException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
@@ -101,8 +101,22 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.toResponse(order);
     }
 
-    public List<OrderResponse> findAll(final LocalDate minDate, final LocalDate maxDate) {
-        Sort sort = Sort.by(Sort.Direction.fromString("DESC"), "orderDate");
+    public PageResponse<OrderResponse> findAll(final LocalDate minDate,
+                                               final LocalDate maxDate,
+                                               final SortAndPageRequest sortAndPageRequest) {
+        var sortDirection = Optional.ofNullable(sortAndPageRequest.getSortDirection())
+                .filter(value -> !value.isBlank())
+                .orElse("desc");
+        var sortAttribute = Optional.ofNullable(sortAndPageRequest.getSortAttribute())
+                .filter(value -> !value.isBlank())
+                .orElse("orderDate");
+
+        Pageable pageable = PageRequest.of(
+                sortAndPageRequest.getPageNumber(),
+                sortAndPageRequest.getPageSize(),
+                Sort.Direction.fromString(sortDirection),
+                sortAttribute
+        );
 
         LocalDateTime minDateTime = Optional.ofNullable(minDate)
                 .map(LocalDate::atStartOfDay)
@@ -115,10 +129,11 @@ public class OrderServiceImpl implements OrderService {
         var orders = orderRepository.findByDate(
                 minDateTime,
                 maxDateTime,
-                sort
+                pageable
         );
 
-        return orders.stream().map(order -> orderMapper.toResponse(order)).toList();
+        var ordersPage = orders.map(order -> orderMapper.toResponse(order));
+        return new PageResponse<>(ordersPage);
     }
 
     private BigDecimal getNetAmount(BigDecimal productTotal, BigDecimal shippingCost, Integer discount) {
