@@ -2,8 +2,8 @@ package com.storeservice.service.impl;
 
 import com.storeservice.domain.dto.PageResponse;
 import com.storeservice.domain.dto.Product;
-import com.storeservice.domain.dto.ProductFilterRequest;
 import com.storeservice.domain.dto.ProductRequest;
+import com.storeservice.domain.dto.SortAndPageRequest;
 import com.storeservice.mapper.ProductMapper;
 import com.storeservice.repository.ProductRepository;
 import com.storeservice.service.ProductService;
@@ -12,6 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -36,22 +39,29 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PageResponse<Product> findAll(ProductFilterRequest request) {
+    public PageResponse<Product> findAll(BigDecimal minPrice,
+                                         BigDecimal maxPrice,
+                                         Integer minStock,
+                                         SortAndPageRequest sortAndPageRequest) {
 
-        var sortDirection = request.getSortDirection().isBlank() ? "asc" : request.getSortDirection();
-        var sortAttribute = request.getSortAttribute().isBlank() ? "name" : request.getSortAttribute();
+        var sortDirection = Optional.ofNullable(sortAndPageRequest.getSortDirection())
+                .filter(value -> !value.isBlank())
+                .orElse("asc");
+        var sortAttribute = Optional.ofNullable(sortAndPageRequest.getSortAttribute())
+                .filter(value -> !value.isBlank())
+                .orElse("name");
 
         Pageable pageable = PageRequest.of(
-                request.getPageNumber(),
-                request.getPageSize(),
+                sortAndPageRequest.getPageNumber(),
+                sortAndPageRequest.getPageSize(),
                 Sort.Direction.fromString(sortDirection),
                 sortAttribute
         );
 
         var entityPage = productRepository.findByPriceAndStock(
-                request.getMinPrice(),
-                request.getMaxPrice(),
-                request.getMinStock(),
+                minPrice,
+                maxPrice,
+                minStock,
                 pageable
         );
 
