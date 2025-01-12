@@ -25,9 +25,9 @@ services:
     command: >
       bash -c "
         sleep 10;
-        echo 'Criando tópicos store-topic e payment-topic'
-        /opt/kafka/bin/kafka-topics.sh kafka-topics.sh --create --if-not-exists --topic store-topic --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 &&
-        /opt/kafka/bin/kafka-topics.sh kafka-topics.sh --create --if-not-exists --topic payment-topic --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 &&
+        echo 'Criando tópicos'
+        /opt/kafka/bin/kafka-topics.sh kafka-topics.sh --create --if-not-exists --topic order-placed --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 &&
+        /opt/kafka/bin/kafka-topics.sh kafka-topics.sh --create --if-not-exists --topic order-status-changed --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 &&
         echo 'Listando todos os tópicos existentes:'
         /opt/kafka/bin/kafka-topics.sh --list --bootstrap-server kafka:9092
       "
